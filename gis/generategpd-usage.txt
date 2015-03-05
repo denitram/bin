@@ -1,0 +1,141 @@
+#################
+# Korte help
+$> python ./generate-geoserverpublishdata.py
+
+#################
+# Bestanden layout
+De directory structuur vanaf de directory waar het script staat naar beneden moet gelijk zijn aan de
+directory structuur van de Geoserver, vanaf de coverage root.
+
+Configuratie bestanden:
+  - config.default: bevat de standaard configuratie die gebruikt wordt bij initeel aanmaken .gpd
+  - session.default: wordt opgeslagen in de directory met files, en wordt vanaf dat moment voor de
+    globale defaults gebruikt
+
+Voorbeeld in ASCII art (files=de raster bestanden):
+
+
+            scriptdir (+config.default)             coverage-root (op server)
+                |                                         |
+       +--------+--------+                       +--------+--------+
+       |                 |                       |                 |
+      nsl               gcn (+config.session)   nsl               gcn
+    (files)           (files)                 (files)           (files)
+
+
+Met een schone lei beginnen: weghalen session.defaults en de .gpd bestanden. Verwijderen van een individueel
+.gpd bestand kan ook, om een nieuwe aan te maken op basis van defaults (gebruik de --file-filter optie).
+
+#################
+# Basis invoeren (interactieve mode)
+$> python ./generate-geoserverpublishdata.py --process-dir=milieu/gcn-gdn/2013/ --workspace=gcn --covstore-key=gcn2013 --strip-name=conc_ --coverage-key=conc --interactive
+
+#################
+# Compleet invoer voorbeeld (met een filter op de files, er komt er maar 1 door).
+# Door slim om te gaan met de GLOBAL defaults kan je veel kopieer- en tikwerk besparen, de mogelijkheid is er om
+# met een + (plus) teken gevens toe te voegen aan de vooringevulde gegevens.
+# Speciaal geval: coverage description is niet zichtbaar, wordt in eerste instantie gelijk gemaakt aan abstract.
+$> python ./generate-geoserverpublishdata.py --process-dir=milieu/gcn-gdn/2013/ --workspace=gcn --covstore-key=gcn2013 --strip-name=conc_ --coverage-key=conc --interactive --file-filter=*o3_BBR2030*
+
+Enter GLOBAL/DEFAULT settings
+Just hit <enter> to accept an existing default.
+
+GLOBAL: Store and layer configuration values
+  Coveragestore description [GCN 2013 raster file]: 
+  Coverage abstract (displayed) [GCN 2013 concentratie gegevens]: Grootschalige Concentratiekaart NL (2013)
+  Coverage description (HIDDEN) [GCN 2013 concentratie gegevens]: Grootschalige Concentratiekaart NL (2013)
+  Coverage keywords (, separated) [RIVM,gezondheid,milieu,health,environment,gcn]: 
+
+GLOBAL: Deploy to the following geoserver host:
+  Geoserver host url [geosl03-ext-t.rivm.nl:8080]: 
+  Geoserver instance [/geoserver]: 
+  Geoserver admin user [geosadmin]: 
+  Geoserver coveragerootdir [coverage-raster/]: 
+Debugging mode:              False
+Process directory:           milieu/gcn-gdn/2013
+Strip from filename:         ['conc_']
+Coveragestore key (prefix):  gcn2013
+Coveragestore description:   GCN 2013 raster file
+Coverage key (prefix):       conc
+Coverage keywords:           RIVM,gezondheid,milieu,health,environment,gcn
+Coverage description:        Grootschalige Concentratiekaart NL (2013)
+Coverage abstract:           Grootschalige Concentratiekaart NL (2013)
+Geoserver workspace:         gcn
+Geoserver host:              geosl03-ext-t.rivm.nl:8080
+Geoserver instance:          /geoserver
+Geoserver user:              geosadmin
+Geoserver coveragefile root: coverage-raster/
+
+Processing: conc_o3_BBR2030_1302.asc ArcGrid
+  Clean filename: o3_bbr2030_1302
+  Coveragestore name: gcn2013_o3_bbr2030_1302
+  Service/coverage name: conc_o3_bbr2030_1302
+  Geoserver Publish Data filename (.gpd): milieu/gcn-gdn/2013/conc_o3_BBR2030_1302.gpd
+  Coveragestore description [GCN 2013 raster file]: 
+  Coverage title (displayed) [conc_o3_bbr2030_1302]: ozon (o3) 2030
+  Coverage abstract (displayed) [Grootschalige Concentratiekaart NL (2013)]: +: ozon (o3) concentratie 2030 (berekening 2013)
+  Coverage description (HIDDEN) [Grootschalige Concentratiekaart NL (2013): ozon (o3) concentratie 2030 (berekening 2013)]: 
+  Coverage keywords (, separated) [RIVM,gezondheid,milieu,health,environment,gcn]: +,o3
+  Coverage/layer style (sld) [layer.style]: gcn_o3
+
+#################
+# 1 file opnieuw maken (filter)
+$> python ./generate-geoserverpublishdata.py --process-dir=milieu/gcn-gdn/2013/ --workspace=gcn --covstore-key=gcn2013 --strip-name=conc_ --coverage-key=conc --interactive --file-filter=*ec_2012*
+
+#################
+# Tonen specifieke parameter (snel overzicht of netjes gelijkvormig ingevoerd), voor specifieke files
+# Typisch gebruiken om de hele set na te lopen (voor alle parameters apart starten)
+$> python ./generate-geoserverpublishdata.py --process-dir=milieu/gcn-gdn/2013/ --show-param=coverage.title --file-filter=*2030*
+milieu/gcn-gdn/2013/conc_ec_BBR2030_1302.gpd                 elementair koolstof (ec) 2030
+milieu/gcn-gdn/2013/conc_pm25_BBR2030_1302.gpd               fijnstof (pm2.5) 2030
+milieu/gcn-gdn/2013/conc_so2_BBR2030_1302.gpd                zwavel dioxide (so2) 2030
+milieu/gcn-gdn/2013/conc_no2_BBR2030_1302.gpd                stikstof dioxide (no2) 2030
+milieu/gcn-gdn/2013/conc_o3_BBR2030_1302.gpd                 ozon (o3) 2030
+milieu/gcn-gdn/2013/conc_pm10_BBR2030_1302.gpd               fijnstof (pm10) 2030
+
+#################
+# Bewerken specifieke parameter (voorbeeld met file filter) (geen '+' syntax)
+# <CTRL-C> om te stoppen, na elk record wordt de data weggeschreven (per file), de berg foutmeldingen kan je negeren
+$> python ./generate-geoserverpublishdata.py --process-dir=milieu/gcn-gdn/2013/ --set-param=coverage.title --file-filter=*2030*
+file: milieu/gcn-gdn/2013/conc_ec_BBR2030_1302.gpd
+coverage.title [elementair koolstof (ec) 2030]: 
+coverage.title=elementair koolstof (ec) 2030
+Writing .gpd file
+
+
+file: milieu/gcn-gdn/2013/conc_pm25_BBR2030_1302.gpd
+coverage.title [fijnstof (pm2.5) 2030]: aap
+coverage.title=aap
+Writing .gpd file
+
+#################
+# Bijwerken (ja, het is bijna een database), in dit voorbeeld wordt coverage.description gevuld met coverage.abstract,
+# dat wordt aangegeven met de : (dubbele punt) (geen '+' syntax)
+$> python ./generate-geoserverpublishdata.py --process-dir=milieu/gcn-gdn/2013/ --update-param=coverage.description --update-value=:coverage.abstract
+
+# Bijwerken met een vaste waarde (let op: hier dus zonder de dubbele punt) (geen '+' syntax)
+$> python ./generate-geoserverpublishdata.py --process-dir=milieu/gcn-gdn/2013/ --update-param=coverage.description --update-value=monkey
+
+##################
+# Publiceren
+# Publiceren naar Geoserver moet met een aparte tool: publish2geoserver.py
+# Deze tool heeft heel wat minder opties, en doet niet meer dan het aanmaken/bijwerken van coveragestores, coverages,
+# en layers via de REST http interface. De Geoserver instantie wordt gelezen uit de config.session directory (dus per
+# aangemaakte set van .gpd files). De tool kan zowel publiceren als bijwerken.
+# Het Geoserver wachtwoord wordt niet opgeslagen, per ongeluk publiceren lukt dus niet.
+# De debug mode toont precies welke requests er gedaan worden, zonder ze uit te voeren. Debug mode starten met
+# de optie --debug, of door een blanco wachtwoord (gewoon <ENTER> bij de wachtwoord prompt).
+# In alle voorbeelden wordt de proxy server (systeem instelling) uitgeschakeld.
+
+# Tonen van alle opties:
+$> python publish2geoserver.py
+
+# Publiceren van alle gpd files in de directory: milieu/gcn-gdn/2013 
+$> python publish2geoserver.py --process-dir=milieu/gcn-gdn/2013 --pub-stores --pub-coverages --set-layeroptions --no-prox
+
+# Bijwerken van alleen de layeroptions (nu: stijlen)
+$> python publish2geoserver.py --process-dir=milieu/gcn-gdn/2013/ --set-layeroptions --update --no-proxy
+
+# CoverageStore informatie voor alle c6h6 bestanden bijwerken (bijv. nieuwe description)
+$> python ./publish2geoserver.py --process-dir=milieu/gcn-gdn/2013/ --file-filter=*c6h6* --pub-stores --update
+
