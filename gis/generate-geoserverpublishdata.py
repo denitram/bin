@@ -176,7 +176,9 @@ def genrasterpublishfiles(files):
     fileext = os.path.splitext(f.lower())[1]
     filename = os.path.basename(f)
     # gridstore_type (extension)
-    if fileext == '.asc':
+    if fileext == '.txt':
+      coveragestore_type="ArcGrid"
+    elif fileext == '.asc':
       coveragestore_type="ArcGrid"
     elif fileext == '.tif':
       coveragestore_type="GeoTIFF"
